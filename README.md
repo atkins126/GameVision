@@ -15,7 +15,7 @@ It's robust, designed for easy, fast & fun use an suitable for making all types 
 
 ## Features
 - **Free and open source**
-- All required libraries are **bundled** in Vivace (<a href="https://github.com/liballeg/allegro5" target="_blank">Allegro</a>, <a href="https://github.com/Immediate-Mode-UI/Nuklear" target="_blank">Nulkear</a>, <a href="https://github.com/SFML/CSFML" target="_blank">CSFMLAudio</a>, <a href="https://github.com/LuaJIT/LuaJIT" target="_blank">LuaJIT</a>)
+- All required libraries are **bundled** in GameVision (<a href="https://github.com/liballeg/allegro5" target="_blank">Allegro</a>, <a href="https://github.com/Immediate-Mode-UI/Nuklear" target="_blank">Nulkear</a>, <a href="https://github.com/SFML/CSFML" target="_blank">CSFMLAudio</a>, <a href="https://github.com/LuaJIT/LuaJIT" target="_blank">LuaJIT</a>)
 - Written in **Object Pascal**, optimized for Delphi 11
 - Support 64bit platform only
 - Hardware accelerated with **Direct3D**
