@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{4D69C7D8-765B-4A12-8767-E3F2750DB396}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="GVDump.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="GVArc.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\Examples\GVExamples.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="GVDump">
+        <MSBuild Projects="GVDump.dproj"/>
+    </Target>
+    <Target Name="GVDump:Clean">
+        <MSBuild Projects="GVDump.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GVDump:Make">
+        <MSBuild Projects="GVDump.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="GVArc">
+        <MSBuild Projects="GVArc.dproj"/>
+    </Target>
+    <Target Name="GVArc:Clean">
+        <MSBuild Projects="GVArc.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GVArc:Make">
+        <MSBuild Projects="GVArc.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="GVExamples">
+        <MSBuild Projects="..\Examples\GVExamples.dproj"/>
+    </Target>
+    <Target Name="GVExamples:Clean">
+        <MSBuild Projects="..\Examples\GVExamples.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="GVExamples:Make">
+        <MSBuild Projects="..\Examples\GVExamples.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="GVDump;GVArc;GVExamples"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="GVDump:Clean;GVArc:Clean;GVExamples:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="GVDump:Make;GVArc:Make;GVExamples:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
