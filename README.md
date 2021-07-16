@@ -54,7 +54,7 @@ It's robust, designed for easy, fast & fun use an suitable for making all types 
 - Documentation is WIP. They will continue to evolve
 - More examples will continually be added over time
 
-## A Tour of Vivace
+## A Tour of GameVision
 ### Game Object
 You just have to derive a new class from the `TCustomGame` base class and override a few callback methods. You access the toolkit functionality from the classes in the various `GameVision.XXX` units.
 ```pascal
