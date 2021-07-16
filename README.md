@@ -1,4 +1,4 @@
-![GameVision Logo](Media/logo.png)
+![GameVision Logo](Media/Logo.png)
 
 [![Chat on Discord](https://img.shields.io/discord/754884471324672040.svg?logo=discord)](https://discord.gg/tPWjMwK) [![GitHub stars](https://img.shields.io/github/stars/tinyBigGAMES/GameVision?style=social)](https://github.com/tinyBigGAMES/GameVision/stargazers) [![GitHub Watchers](https://img.shields.io/github/watchers/tinyBigGAMES/GameVision?style=social)](https://github.com/tinyBigGAMES/GameVision/network/members) [![GitHub forks](https://img.shields.io/github/forks/tinyBigGAMES/GameVision?style=social)](https://github.com/tinyBigGAMES/GameVision/network/members)
 [![Twitter Follow](https://img.shields.io/twitter/follow/tinyBigGAMES?style=social)](https://twitter.com/tinyBigGAMES)
