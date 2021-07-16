@@ -62,12 +62,16 @@ uses
 
 const
 
-  {$IF Defined(WIN64)}
-  cDllName = 'allegro_monolith-5.2.dll';
-  _PU = '';
+  {$IF CompilerVersion >= 35} // Meeds Delphi 11 or higher required
+    {$IF Defined(WIN64)}
+    cDllName = 'allegro_monolith-5.2.dll';
+    _PU = '';
+    {$ELSE}
+      {$MESSAGE Error 'Unsupported platform'}
+    {$ENDIF}
   {$ELSE}
-    {$MESSAGE Error 'Unsupported platform'}
-  {$ENDIF}
+    {$MESSAGE Error 'Unsupported Delphi version'}
+  {$IFEND}
 
   // Version information
   GAMEVISION_MAJOR_VERSION  = '0';
