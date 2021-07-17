@@ -370,7 +370,7 @@ type
     class procedure Setup; static;
     class procedure Shutdown; static;
 
-    class function  Open(aWidth: Integer; aHeight: Integer; aFullscreen: Boolean; aTitle: string): Boolean; static;
+    class function  Open(aWidth: Integer; aHeight: Integer; aFullscreen: Boolean; aTitle: string; aUseProgrammablePipeline: Boolean=False): Boolean; static;
     class function  Close: Boolean; static;
     class function  Opened: Boolean; static;
 
@@ -1681,13 +1681,15 @@ begin
   Logger.Log('Shutdown %s Subsystem', ['Display']);
 end;
 
-class function Display.Open(aWidth: Integer; aHeight: Integer; aFullscreen: Boolean; aTitle: string): Boolean;
+class function Display.Open(aWidth: Integer; aHeight: Integer; aFullscreen: Boolean; aTitle: string; aUseProgrammablePipeline: Boolean): Boolean;
 var
   LFlags: Integer;
 begin
   Result := False;
   //LFlags :=  ALLEGRO_OPENGL or ALLEGRO_RESIZABLE or ALLEGRO_PROGRAMMABLE_PIPELINE;
-  LFlags :=  ALLEGRO_DIRECT3D or ALLEGRO_RESIZABLE or ALLEGRO_PROGRAMMABLE_PIPELINE;
+  //LFlags :=  ALLEGRO_DIRECT3D or ALLEGRO_RESIZABLE or ALLEGRO_PROGRAMMABLE_PIPELINE;
+  LFlags :=  ALLEGRO_DIRECT3D or ALLEGRO_RESIZABLE;
+  if aUseProgrammablePipeline then LFlags := LFlags or ALLEGRO_PROGRAMMABLE_PIPELINE;
   if aFullscreen then LFlags := LFlags or ALLEGRO_FULLSCREEN_WINDOW;
   al_set_new_display_option(ALLEGRO_COMPATIBLE_DISPLAY, 1, ALLEGRO_REQUIRE);
   al_set_new_display_option(ALLEGRO_VSYNC, 1, ALLEGRO_SUGGEST);

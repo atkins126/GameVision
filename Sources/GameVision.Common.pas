@@ -92,7 +92,6 @@ const
   TREEMENU_NONE         = -1;
   TREEMENU_QUIT         = -2;
 
-
   // Common Object Attributes
   cAudioObjectAttr    = 0;
   cGraphicsObjectAttr = 1;

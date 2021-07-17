@@ -72,7 +72,8 @@ uses
   uUI,
   uSystem,
   uElastic,
-  uAstroBlaster;
+  uAstroBlaster,
+  uChainAction;
 
 type
   { TTestbed }
@@ -149,7 +150,8 @@ type
 
     // demos
     miDemo_Elastic,
-    miDemo_AstroBlaster
+    miDemo_AstroBlaster,
+    miDemo_ChainAction
     );
 var
   LTreeMenu: TTreeMenu;
@@ -210,6 +212,7 @@ begin
     LDemos := LTreeMenu.AddItem(0, 'Demos', TREEMENU_NONE, True);
       LTreeMenu.AddItem(LDemos, 'Elastic', Ord(miDemo_Elastic), True);
       LTreeMenu.AddItem(LDemos, 'AstroBlaster', Ord(miDemo_AstroBlaster), True);
+      LTreeMenu.AddItem(LDemos, 'ChainAction', Ord(miDemo_ChainAction), True);
     LTreeMenu.Sort(LDemos);
 
     LSelItem := ConfigFile.GetValue('TreeMenu', 'SelItem', TREEMENU_NONE);
@@ -233,6 +236,7 @@ begin
         // demos
         miDemo_Elastic                 : Engine.RunGame(TElastic);
         miDemo_AstroBlaster            : Engine.RunGame(TAstroBlasterDemo);
+        miDemo_ChainAction             : Engine.RunGame(TChainAction);
       end;
     until LSelItem = TREEMENU_QUIT;
     ConfigFile.SetValue('TreeMenu', 'SelItem', LTreeMenu.GetLastSelectedId);

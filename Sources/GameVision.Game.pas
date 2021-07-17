@@ -280,6 +280,7 @@ type
     SceneCount: Integer;
     SceneRenderAttr: TActorAttributeSet;
     SceneUpdateAttr: TActorAttributeSet;
+    ProgrammablePipeLine: Boolean;
   end;
 
   { TCustomGameApp }
@@ -1392,6 +1393,7 @@ begin
   Config.SceneCount := 1;
   Config.SceneRenderAttr := [];
   Config.SceneUpdateAttr := [];
+  Config.ProgrammablePipeLine := False;
   OnSetConfig(Config);
 
   inherited;
@@ -1425,7 +1427,7 @@ begin
   inherited;
 
   // open display
-  Display.Open(Config.DisplayWidth, Config.DisplayHeight, Config.DisplayFullscreen, Config.DisplayTitle);
+  Display.Open(Config.DisplayWidth, Config.DisplayHeight, Config.DisplayFullscreen, Config.DisplayTitle, Config.ProgrammablePipeLine);
 
   // init font
   FFont := TFont.Create;
