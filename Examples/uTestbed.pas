@@ -101,6 +101,8 @@ procedure TTestbed.OnLoad;
 begin
   inherited;
 
+  //Styles.SetByIndex(7);
+  Styles.SetByName('Slate Classico');
 end;
 
 procedure TTestbed.OnExit;
@@ -112,6 +114,7 @@ end;
 function  TTestbed.OnStartupDialogShow: Boolean;
 begin
   StartupDialog.SetCaption(cAppTitle);
+  StartupDialog.SetLogoClickUrl(GAMEVISION_URL);
   StartupDialog.SetReleaseInfo('Version ' + GAMEVISION_VERSION);
   StartupDialog.SetLogo('arc/startup/banner.png');
   StartupDialog.SetReadme('arc/startup/README.rtf');

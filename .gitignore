@@ -69,6 +69,7 @@ __recovery/
 modules/
 
 # GameVision files
+Bin/Screenshots/
 *.arc
 *.log
 *.cfg

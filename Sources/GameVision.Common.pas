@@ -83,6 +83,7 @@ const
   GAMEVISION_LEGALTRADEMARK = 'All rights reserved.';
   GAMEVISION_WEBISTE        = 'https://tinybiggames.com';
   GAMEVISION_EMAIL          = 'support@tinybiggames.com';
+  GAMEVISION_URL            = 'https://gamevision.dev';
 
   // Custom events
   EVENT_CMDCON_ACTIVE   = 10000;

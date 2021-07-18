@@ -83,7 +83,7 @@ object StartupDialogForm: TStartupDialogForm
     Top = 84
     Width = 511
     Height = 225
-    ActivePage = tbReadme
+    ActivePage = tbConfig
     TabOrder = 4
     object tbReadme: TTabSheet
       Margins.Left = 5
@@ -165,8 +165,8 @@ object StartupDialogForm: TStartupDialogForm
       object StringGrid: TStringGrid
         Left = 0
         Top = 0
-        Width = 759
-        Height = 303
+        Width = 503
+        Height = 197
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -175,7 +175,6 @@ object StartupDialogForm: TStartupDialogForm
         Color = 12189695
         ColCount = 2
         DefaultColWidth = 96
-        DefaultRowHeight = 36
         DoubleBuffered = True
         DrawingStyle = gdsClassic
         FixedCols = 0

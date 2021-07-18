@@ -346,6 +346,26 @@ type
     class procedure Process; static;
   end;
 
+{ --- OS -------------------------------------------------------------------- }
+type
+  { TOS }
+  TOS = record
+    class function  GetComputerName: string; static;
+    class function  GetVersion: string; static;
+    class function  GetLoggedUserName: string; static;
+    class function  GetNow: string; static;
+    class procedure ProcessMessages; static;
+    class function  GetLastError: string; static;
+    class procedure Sleep(aMilliseconds: Cardinal); static;
+    class function  GetAppName: string; static;
+    class function  GetAppPath: string; static;
+    class function  GetCPUCount: Integer; static;
+    class function  GetOSVersion: string; static;
+    class procedure GetDiskFreeSpace(const aPath: string; var aFreeSpace: Int64; var aTotalSpace: Int64); static;
+    class procedure GetMemoryFree(var aAvailMem: UInt64; var aTotalMem: UInt64); static;
+    class function  GetVideoCard: string; static;
+  end;
+
 { --- GAME ------------------------------------------------------------------ }
 type
   { TBaseGame }
@@ -1998,6 +2018,97 @@ end;
 class procedure Async.Leave;
 begin
   FCriticalSection.Leave;
+end;
+
+{ --- OS -------------------------------------------------------------------- }
+class function TOS.GetComputerName: string;
+var
+  LLength: dword;
+begin
+  LLength := 253;
+  SetLength(Result, LLength+1);
+  if not WinApi.Windows.GetComputerName(PChar(Result), LLength) then Result := 'Not detected!';
+  Result := PChar(result);
+end;
+
+class function TOS.GetLoggedUserName: string;
+const
+  cnMaxUserNameLen = 254;
+var
+  sUserName     : string;
+  dwUserNameLen : DWord;
+begin
+  dwUserNameLen := cnMaxUserNameLen-1;
+  SetLength( sUserName, cnMaxUserNameLen );
+  GetUserName(PChar( sUserName ),dwUserNameLen );
+  SetLength( sUserName, dwUserNameLen );
+  Result := sUserName;
+end;
+
+class function TOS.GetVersion: string;
+begin
+  Result := TOSVersion.ToString;
+end;
+
+class function  TOS.GetNow: string;
+begin
+  Result := DateTimeToStr(Now());
+end;
+
+class procedure TOS.ProcessMessages;
+begin
+  GameVision.Utils.ProcessMessages;
+end;
+
+class function TOS.GetLastError: string;
+begin
+  Result := SysErrorMessage(WinAPI.Windows.GetLastError);
+end;
+
+class procedure TOS.Sleep(aMilliseconds: Cardinal);
+begin
+  System.SysUtils.Sleep(aMilliseconds)
+end;
+
+class function TOS.GetAppName: string;
+begin
+  Result := Format('%s %s',[TPath.GetFileNameWithoutExtension(ParamStr(0)),GetAppVersionFullStr]);
+end;
+
+class function TOS.GetAppPath: string;
+begin
+  Result := ExtractFilePath(ParamStr(0));
+end;
+
+class function  TOS.GetCPUCount: Integer;
+begin
+  Result := CPUCount;
+end;
+
+class function  TOS.GetOSVersion: string;
+begin
+  Result := TOSVersion.ToString;
+end;
+
+class procedure TOS.GetDiskFreeSpace(const aPath: string; var aFreeSpace: Int64; var aTotalSpace: Int64);
+begin
+  GetDiskFreeSpaceEx(PChar(aPath), aFreeSpace, aTotalSpace, nil);
+end;
+
+class procedure TOS.GetMemoryFree(var aAvailMem: UInt64; var aTotalMem: UInt64);
+var
+  LMemStatus: MemoryStatusEx;
+begin
+ FillChar (LMemStatus, SizeOf(MemoryStatusEx), #0);
+ LMemStatus.dwLength := SizeOf(MemoryStatusEx);
+ GlobalMemoryStatusEx (LMemStatus);
+ aAvailMem := LMemStatus.ullAvailPhys;
+ aTotalMem := LMemStatus.ullTotalPhys;
+end;
+
+class function TOS.GetVideoCard: string;
+begin
+  Result := GetVideoCardName;
 end;
 
 { --- GAME ------------------------------------------------------------------ }

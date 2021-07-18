@@ -63,14 +63,20 @@ procedure GotoURL(aURL: string);
 function  ResourceExists(aResName: string): Boolean;
 function  FileCount(const aPath: string; const aSearchMask: string): Int64;
 function  GetFileSize(const aFilename: string): Int64;
+function  GetVideoCardName: string;
+function  GetAppVersionStr: string;
+function  GetAppVersionFullStr: string;
 
 implementation
 
 uses
   System.SysUtils,
   System.IOUtils,
+  System.Variants,
+  System.Win.ComObj,
   WinApi.Windows,
-  WinApi.ShellAPI;
+  WinApi.ShellAPI,
+  WinApi.ActiveX;
 
 function HasConsoleOutput: Boolean;
 var
@@ -127,5 +133,95 @@ begin
   if NOT GetFileAttributesEx(PWideChar(aFileName), GetFileExInfoStandard, @LInfo) then Exit;
   Result := Int64(LInfo.nFileSizeLow) or Int64(LInfo.nFileSizeHigh shl 32);
 end;
+
+function GetVideoCardName: string;
+const
+  WbemUser = '';
+  WbemPassword = '';
+  WbemComputer = 'localhost';
+  wbemFlagForwardOnly = $00000020;
+var
+  LFSWbemLocator: OLEVariant;
+  LFWMIService: OLEVariant;
+  LFWbemObjectSet: OLEVariant;
+  LFWbemObject: OLEVariant;
+  LEnum: IEnumvariant;
+  LValue: LongWord;
+begin;
+  try
+    LFSWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
+    LFWMIService := LFSWbemLocator.ConnectServer(WbemComputer, 'root\CIMV2',
+      WbemUser, WbemPassword);
+    LFWbemObjectSet := LFWMIService.ExecQuery
+      ('SELECT Name,PNPDeviceID  FROM Win32_VideoController', 'WQL',
+      wbemFlagForwardOnly);
+    LEnum := IUnknown(LFWbemObjectSet._NewEnum) as IEnumvariant;
+    while LEnum.Next(1, LFWbemObject, LValue) = 0 do
+    begin
+      result := String(LFWbemObject.Name);
+      LFWbemObject := Unassigned;
+    end;
+  except
+  end;
+end;
+
+function GetAppVersionStr: string;
+var
+  LRec: LongRec;
+  LVer : Cardinal;
+begin
+  LVer := GetFileVersion(ParamStr(0));
+  if LVer <> Cardinal(-1) then
+  begin
+    LRec := LongRec(LVer);
+    Result := Format('%d.%d', [LRec.Hi, LRec.Lo]);
+  end
+  else Result := '';
+end;
+
+function GetAppVersionFullStr: string;
+var
+  LExe: string;
+  LSize, LHandle: DWORD;
+  LBuffer: TBytes;
+  LFixedPtr: PVSFixedFileInfo;
+begin
+  Result := '';
+  LExe := ParamStr(0);
+  LSize := GetFileVersionInfoSize(PChar(LExe), LHandle);
+  if LSize = 0 then
+  begin
+    //RaiseLastOSError;
+    //no version info in file
+    Exit;
+  end;
+  SetLength(LBuffer, LSize);
+  if not GetFileVersionInfo(PChar(LExe), LHandle, LSize, LBuffer) then
+    RaiseLastOSError;
+  if not VerQueryValue(LBuffer, '\', Pointer(LFixedPtr), LSize) then
+    RaiseLastOSError;
+  if (LongRec(LFixedPtr.dwFileVersionLS).Hi = 0) and (LongRec(LFixedPtr.dwFileVersionLS).Lo = 0) then
+  begin
+    Result := Format('%d.%d',
+    [LongRec(LFixedPtr.dwFileVersionMS).Hi,   //major
+     LongRec(LFixedPtr.dwFileVersionMS).Lo]); //minor
+  end
+  else if (LongRec(LFixedPtr.dwFileVersionLS).Lo = 0) then
+  begin
+    Result := Format('%d.%d.%d',
+    [LongRec(LFixedPtr.dwFileVersionMS).Hi,   //major
+     LongRec(LFixedPtr.dwFileVersionMS).Lo,   //minor
+     LongRec(LFixedPtr.dwFileVersionLS).Hi]); //release
+  end
+  else
+  begin
+    Result := Format('%d.%d.%d.%d',
+    [LongRec(LFixedPtr.dwFileVersionMS).Hi,   //major
+     LongRec(LFixedPtr.dwFileVersionMS).Lo,   //minor
+     LongRec(LFixedPtr.dwFileVersionLS).Hi,   //release
+     LongRec(LFixedPtr.dwFileVersionLS).Lo]); //build
+  end;
+end;
+
 
 end.

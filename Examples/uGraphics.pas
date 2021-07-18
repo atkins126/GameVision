@@ -83,6 +83,10 @@ type
 
   { TBitmapTiled }
   TBitmapTiled = class(TCustomExample)
+  protected
+    FTexture: array[0..3] of TBitmap;
+    FSpeed: array[0..3] of Single;
+    FPos: array[0..3] of TVector;
   public
     procedure OnSetConfig(var aConfig: TGameConfig); override;
     procedure OnLoad; override;
@@ -148,6 +152,8 @@ type
 
   { TBitmapTrueTrans }
   TBitmapPNGTrans = class(TCustomExample)
+  protected
+    FBmp: TBitmap;
   public
     procedure OnSetConfig(var aConfig: TGameConfig); override;
     procedure OnLoad; override;
@@ -161,6 +167,8 @@ type
 
   { TBitmapColorKeyTrans }
   TBitmapColorKeyTrans = class(TCustomExample)
+  protected
+    FBmp: array[ 0..1 ] of TBitmap;
   public
     procedure OnSetConfig(var aConfig: TGameConfig); override;
     procedure OnLoad; override;
@@ -257,6 +265,13 @@ procedure TBitmapPNGTrans.OnRender;
 begin
   inherited;
 
+  FBmp.Draw(Config.DisplayWidth/2, Config.DisplayHeight/2, 1, 0, WHITE, haCenter, vaCenter);
+
+  var LSize: TVector;
+  FBmp.GetSize(LSize);
+
+  Font.Print(Config.DisplayWidth/2, (Config.DisplayHeight/2)+(LSize.Y/3.5), DARKORANGE, haCenter, 'PNG transparency', []);
+
 end;
 
 procedure TBitmapPNGTrans.OnRenderHUD;
@@ -274,13 +289,16 @@ end;
 
 procedure TBitmapPNGTrans.OnShutdown;
 begin
-  inherited;
+  FreeAndNil(FBmp);
 
+  inherited;
 end;
 
 procedure TBitmapPNGTrans.OnStartup;
 begin
   inherited;
+
+  FBmp := TBitmap.LoadBitmap('arc/bitmaps/sprites/alphacheese.png', nil);
 
 end;
 
@@ -307,6 +325,18 @@ procedure TBitmapColorKeyTrans.OnRender;
 begin
   inherited;
 
+  var LCenterPos: TVector;
+  LCenterPos.Assign(Config.DisplayWidth/2, Config.DisplayHeight/2);
+
+  var LSize: TVector;
+  FBmp[0].GetSize(LSize);
+
+  FBmp[0].Draw(LCenterPos.X, LCenterPos.Y-LSize.Y, 1.0, 0.0, WHITE, haCenter, vaCenter);
+  FBmp[1].Draw(LCenterPos.X, LCenterPos.Y+LSize.Y, 1.0, 0.0, WHITE, haCenter, vaCenter);
+
+  Font.Print(LCenterPos.X, LCenterPos.Y-(LSize.Y/2), DARKORANGE, haCenter, 'without colorkey', []);
+  Font.Print(LCenterPos.X, LCenterPos.Y+(LSize.Y*1.5), DARKORANGE, haCenter, 'with colorkey', []);
+
 end;
 
 procedure TBitmapColorKeyTrans.OnRenderHUD;
@@ -325,13 +355,18 @@ end;
 
 procedure TBitmapColorKeyTrans.OnShutdown;
 begin
-  inherited;
+  FreeAndNil(FBmp[1]);
+  FreeAndNil(FBmp[0]);
 
+  inherited;
 end;
 
 procedure TBitmapColorKeyTrans.OnStartup;
 begin
   inherited;
+
+  FBmp[0] := TBitmap.LoadBitmap('arc/bitmaps/sprites/circle00.png', nil);
+  FBmp[1] := TBitmap.LoadBitmap('arc/bitmaps/sprites/circle00.png', @COLORKEY);
 
 end;
 
@@ -596,10 +631,11 @@ begin
 end;
 
 { TBitmapTiled }
-procedure TBitmapTiled.OnExit;
+procedure TBitmapTiled.OnSetConfig(var aConfig: TGameConfig);
 begin
   inherited;
 
+  aConfig.DisplayTitle := cExampleTitle + 'Bitmap Tiled';
 end;
 
 procedure TBitmapTiled.OnLoad;
@@ -608,39 +644,77 @@ begin
 
 end;
 
-procedure TBitmapTiled.OnRender;
+procedure TBitmapTiled.OnExit;
 begin
+
   inherited;
-
-end;
-
-procedure TBitmapTiled.OnRenderHUD;
-begin
-  inherited;
-
-end;
-
-procedure TBitmapTiled.OnSetConfig(var aConfig: TGameConfig);
-begin
-  inherited;
-
-  aConfig.DisplayTitle := cExampleTitle + 'Bitmap Tiled';
-
-end;
-
-procedure TBitmapTiled.OnShutdown;
-begin
-  inherited;
-
 end;
 
 procedure TBitmapTiled.OnStartup;
 begin
   inherited;
 
+  // Load bitmap images
+  FTexture[0] := TBitmap.LoadBitmap('arc/bitmaps/backgrounds/space.png', nil);
+  FTexture[1] := TBitmap.LoadBitmap('arc/bitmaps/backgrounds/nebula.png', @BLACK);
+  FTexture[2] := TBitmap.LoadBitmap('arc/bitmaps/backgrounds/spacelayer1.png', @BLACK);
+  FTexture[3] := TBitmap.LoadBitmap('arc/bitmaps/backgrounds/spacelayer2.png', @BLACK);
+
+  // Set bitmap speeds
+  FSpeed[0] := 0.3 * 30;
+  FSpeed[1] := 0.5 * 30;
+  FSpeed[2] := 1.0 * 30;
+  FSpeed[3] := 2.0 * 30;
+
+  // Clear pos
+  FPos[0].Clear;
+  FPos[1].Clear;
+  FPos[2].Clear;
+  FPos[3].Clear;
+end;
+
+procedure TBitmapTiled.OnShutdown;
+var
+  LI: Integer;
+begin
+  for LI := 0 to 3 do
+    FreeAndNil(FTexture[LI]);
+
+  inherited;
 end;
 
 procedure TBitmapTiled.OnUpdate(aDeltaTime: Double);
+var
+  LI: Integer;
+begin
+  inherited;
+
+  // update bitmap position
+  for LI := 0 to 3 do
+  begin
+    FPos[LI].Y := FPos[LI].Y + (FSpeed[LI] * aDeltaTime);
+  end;
+end;
+
+procedure TBitmapTiled.OnRender;
+var
+  LI: Integer;
+begin
+  inherited;
+
+  // render bitmaps
+  for LI := 0 to 3 do
+  begin
+    if LI = 1 then
+    begin
+      Display.SetBlendMode(bmAdditiveAlpha);
+    end;
+    FTexture[LI].DrawTiled(FPos[LI].X, FPos[LI].Y);
+    if LI = 1 then Display.RestoreDefaultBlendMode;
+  end;
+end;
+
+procedure TBitmapTiled.OnRenderHUD;
 begin
   inherited;
 

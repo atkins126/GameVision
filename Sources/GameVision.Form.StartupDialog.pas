@@ -141,16 +141,15 @@ begin
 end;
 
 procedure TStartupDialogForm.UpdateConfigInfo;
-//var
-//  LFreeSpace: Int64;
-//  LTotalSpace: Int64;
-//  LAvailMem: UInt64;
-//  LTotalMem: UInt64;
+var
+  LFreeSpace: Int64;
+  LTotalSpace: Int64;
+  LAvailMem: UInt64;
+  LTotalMem: UInt64;
 begin
   //StringGrid.RowCount := 6;
-  (*
-  StringGrid.ColWidths[0] := 200;
-  StringGrid.ColWidths[1] := 530;
+  //StringGrid.ColWidths[0] := 200;
+  //StringGrid.ColWidths[1] := 530;
 
   StringGrid.Cells[0,0] := 'Application';
   StringGrid.Cells[1,0] := TOS.GetAppName;
@@ -168,7 +167,7 @@ begin
   StringGrid.Cells[0,4] := 'Memory Freel/Total';
   StringGrid.Cells[1,4] := Format('%3.2f/%3.2f Gigabytes', [(LAvailMem/1073741824), (LTotalMem/1073741824)]);
 
-  TOS.GetDiskFreeSpace(LFreeSpace, LTotalSpace);
+  TOS.GetDiskFreeSpace(TOS.GetAppPath, LFreeSpace, LTotalSpace);
   StringGrid.Cells[0,5] := 'HD Free/Total';
   StringGrid.Cells[1,5] := Format('%3.2f/%3.2f Gigabytes', [(LFreeSpace/1073741824), (LTotalSpace/1073741824)]);
 
@@ -178,7 +177,7 @@ begin
   //TODO: figure how to get video card memory
   //StringGrid.Cells[0,7] := 'Video Memory';
   //StringGrid.Cells[1,7] := Format('%d Gigabytes', [(GetVideoCardMemory)]);
-  *)
+
 end;
 
 procedure TStartupDialogForm.SetCaption(aCaption: string);
