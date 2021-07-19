@@ -84,6 +84,7 @@ type
     procedure OnRenderHUD; override;
     procedure OnDisplayShow; override;
     procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnDisplayToggleFullscreen(aFullscreen: Boolean); override;
   end;
 
 implementation
@@ -147,6 +148,11 @@ begin
   if Input.KeyboardPressed(KEY_F11) then
     Screenshot.Take;
 
+end;
+
+procedure TCustomExample.OnDisplayToggleFullscreen(aFullscreen: Boolean);
+begin
+  inherited;
 end;
 
 end.

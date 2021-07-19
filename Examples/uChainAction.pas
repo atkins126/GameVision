@@ -489,11 +489,11 @@ begin
   else
     LC := DIMWHITE;
 
-  Font.Print(LX, 120, LC, haCenter, 'Click mouse to start chain reaction', []);
+  Font.Print(LX, 120{*Display.GetUpScale}, LC, haCenter, 'Click mouse to start chain reaction', []);
 
   if LevelClear then
   begin
-    Font.Print(LX, 120+21, ORANGE, haCenter, 'Press SPACE to start new level', []);
+    Font.Print(LX, (120+21){*Display.GetUpScale}, ORANGE, haCenter, 'Press SPACE to start new level', []);
   end;
 end;
 

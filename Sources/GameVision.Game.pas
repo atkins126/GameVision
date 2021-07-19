@@ -281,13 +281,14 @@ type
     SceneRenderAttr: TActorAttributeSet;
     SceneUpdateAttr: TActorAttributeSet;
     ProgrammablePipeLine: Boolean;
+    FontSize: Cardinal;
   end;
 
   { TCustomGameApp }
   TCustomGameApp = class(TCustomGame)
   protected
     FConfigFile: TConfigFile;
-    FFont: TFont;
+    FFont: TScaledFont;
     FScene: TActorScene;
     FSprite: TSprite;
   public
@@ -296,7 +297,7 @@ type
     MousePos: TVector;
 
     property ConfigFile: TConfigFile read FConfigFile;
-    property Font: TFont read FFont;
+    property Font: TScaledFont read FFont;
     property Scene: TActorScene read FScene;
     property Sprite: TSprite read FSprite;
 
@@ -1394,6 +1395,7 @@ begin
   Config.SceneRenderAttr := [];
   Config.SceneUpdateAttr := [];
   Config.ProgrammablePipeLine := False;
+  Config.FontSize := 20;
   OnSetConfig(Config);
 
   inherited;
@@ -1430,8 +1432,8 @@ begin
   Display.Open(Config.DisplayWidth, Config.DisplayHeight, Config.DisplayFullscreen, Config.DisplayTitle, Config.ProgrammablePipeLine);
 
   // init font
-  FFont := TFont.Create;
-  FFont.Load(20);
+  FFont := TScaledFont.Create;
+  FFont.Load(Config.FontSize);
 
   // init sprite
   FSprite := TSprite.Create;
