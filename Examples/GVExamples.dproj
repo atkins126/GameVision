@@ -155,7 +155,7 @@
         <DCCReference Include="uGraphics.pas"/>
         <DCCReference Include="uInput.pas"/>
         <DCCReference Include="uSystem.pas"/>
-        <DCCReference Include="uUI.pas"/>
+        <DCCReference Include="uGUI.pas"/>
         <DCCReference Include="uNetwork.pas"/>
         <DCCReference Include="..\sources\GameVision.CLib.CSFMLAudio.pas"/>
         <DCCReference Include="uElastic.pas"/>
@@ -163,6 +163,8 @@
         <DCCReference Include="uChainAction.pas"/>
         <DCCReference Include="uScroll.pas"/>
         <DCCReference Include="uViewports.pas"/>
+        <DCCReference Include="uGame.pas"/>
+        <DCCReference Include="uUI.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -195,6 +197,11 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
+                    <Platform Name="OSX32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="..\bin\GVExamples.rsm" Configuration="Debug" Class="DebugSymbols">
                     <Platform Name="Win64">
                         <RemoteName>GVExamples.rsm</RemoteName>
@@ -214,11 +221,6 @@
                 </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\iossimulator\libcgunwind.1.0.dylib" Class="DependencyModule">
                     <Platform Name="iOSSimulator">
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
-                    <Platform Name="OSX32">
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

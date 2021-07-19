@@ -51,7 +51,7 @@
   OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================================================================== }
 
-unit uUI;
+unit uGame;
 
 interface
 
@@ -81,7 +81,39 @@ type
     procedure OnUpdate(aDeltaTime: Double); override;
   end;
 
+  { TMyActor }
+  TMyActor = class(TActor)
+  protected
+    FPos: TVector;
+    FRange: TRange;
+    FSpeed: TVector;
+    FColor: TColor;
+    FSize: Integer;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnRender; override;
+  end;
+
+  { TGameActorBasic }
+  TGameActorBasic = class(TCustomExample)
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+    procedure Spawn;
+  end;
+
 implementation
+
+var
+  Game: TGameActorBasic = nil;
+
 
 { TTemplate }
 procedure TTemplate.OnSetConfig(var aConfig: TGameConfig);
@@ -134,6 +166,133 @@ begin
 
 end;
 
+
+{ TMyActor }
+constructor TMyActor.Create;
+var
+  LR,LG,LB: Byte;
+begin
+  inherited;
+
+  FPos.Assign( Math.RandomRange(0, Game.Config.DisplayWidth-1), Math.RandomRange(0, Game.Config.DisplayHeight-1));
+
+  FRange.MinX := 0;
+  FRange.MinY := 0;
+
+  FSize := Math.RandomRange(25, 100);
+
+  FRange.MaxX := (Game.Config.DisplayWidth-1) - FSize;
+  FRange.MaxY := (Game.Config.DisplayHeight-1) - FSize;
+
+  FSpeed.x := Math.RandomRange(120, 120*3);
+  FSpeed.y := Math.RandomRange(120, 120*3);
+
+  LR := Math.RandomRange(1, 255);
+  LG := Math.RandomRange(1, 255);
+  LB := Math.RandomRange(1, 255);
+  FColor.Make(LR,LG,LB,255);
+end;
+
+destructor TMyActor.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TMyActor.OnUpdate(aDeltaTime: Double);
+begin
+  // update horizontal movement
+  FPos.x := FPos.x + (FSpeed.x * aDeltaTime);
+  if (FPos.x < FRange.MinX) then
+    begin
+      FPos.x  := FRange.Minx;
+      FSpeed.x := -FSpeed.x;
+    end
+  else if (FPos.x > FRange.Maxx) then
+    begin
+      FPos.x  := FRange.Maxx;
+      FSpeed.x := -FSpeed.x;
+    end;
+
+  // update horizontal movement
+  FPos.y := FPos.y + (FSpeed.y * aDeltaTime);
+  if (FPos.y < FRange.Miny) then
+    begin
+      FPos.y  := FRange.Miny;
+      FSpeed.y := -FSpeed.y;
+    end
+  else if (FPos.y > FRange.Maxy) then
+    begin
+      FPos.y  := FRange.Maxy;
+      FSpeed.y := -FSpeed.y;
+    end;
+end;
+
+procedure TMyActor.OnRender;
+begin
+  Display.DrawFilledRectangle(FPos.X, FPos.Y, FSize, FSize, FColor);
+end;
+
+
+{ TActorBasic }
+constructor TGameActorBasic.Create;
+begin
+  inherited;
+
+  Game := Self;
+end;
+
+destructor TGameActorBasic.Destroy;
+begin
+  Game := nil;
+
+  inherited;
+end;
+
+procedure TGameActorBasic.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Basic Actor';
+end;
+
+procedure TGameActorBasic.OnStartup;
+begin
+  inherited;
+
+  Spawn;
+end;
+
+procedure TGameActorBasic.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  if Input.KeyboardPressed(KEY_S) then Spawn;
+end;
+
+procedure TGameActorBasic.OnRender;
+begin
+  inherited;
+
+end;
+
+procedure TGameActorBasic.OnRenderHUD;
+begin
+  inherited;
+
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, 'S         - Spawn actors', []);
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, YELLOW, haLeft, 'Count       %d', [Scene.Lists[0].Count]);
+end;
+
+procedure TGameActorBasic.Spawn;
+var
+  LI, LCount: Integer;
+begin
+  Scene.ClearAll;
+  LCount := Math.RandomRange(3, 25);
+  for LI := 1 to LCount do
+    Scene.Lists[0].Add(TMyActor.Create);
+end;
 
 
 end.

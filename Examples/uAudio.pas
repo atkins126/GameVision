@@ -81,6 +81,37 @@ type
     procedure OnUpdate(aDeltaTime: Double); override;
   end;
 
+  { TAudioSound }
+  TAudioSound = class(TCustomExample)
+  protected
+    FSamples: array[ 0..8 ] of Integer;
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+  end;
+
+
+  { TAudioMusic }
+  TAudioMusic = class(TCustomExample)
+  protected
+    FFilename: string;
+    FNum: Integer;
+    FMusic: Integer;
+    procedure Play(aNum: Integer; aVol: Single);
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+  end;
+
+
   { TAudioPositional }
   TAudioPositional = class(TCustomExample)
   protected
@@ -115,6 +146,9 @@ type
   end;
 
 implementation
+
+uses
+  System.IOUtils;
 
 { TTemplate }
 procedure TTemplate.OnSetConfig(var aConfig: TGameConfig);
@@ -293,6 +327,161 @@ begin
   inherited;
 
   Audio.SetChannelPosition(FChan, MousePos.X, MousePos.Y);
+end;
+
+{ TAudioMusic }
+procedure TAudioMusic.Play(aNum: Integer; aVol: Single);
+begin
+  FFilename := Format('arc/audio/music/song%.*d.ogg', [2,aNum]);
+  Audio.UnloadMusic(FMusic);
+  FMusic := Audio.LoadMusic(FFilename);
+  Audio.PlayMusic(FMusic, aVol, True);
+end;
+
+procedure TAudioMusic.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Music Audio';
+end;
+
+procedure TAudioMusic.OnStartup;
+begin
+  inherited;
+
+  FNum := 1;
+  FFilename := '';
+  FMusic := -1;
+  Play(1, 1.0);
+end;
+
+procedure TAudioMusic.OnShutdown;
+begin
+  Audio.UnloadMusic(FMusic);
+
+  inherited;
+end;
+
+procedure TAudioMusic.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  if Input.KeyboardPressed(KEY_PGUP) then
+  begin
+    Inc(FNum);
+    if FNum > 13 then
+      FNum := 1;
+    Play(FNum, 1.0);
+  end
+  else
+  if Input.KeyboardPressed(KEY_PGDN) then
+  begin
+    Dec(FNum);
+    if FNum < 1 then
+      FNum := 13;
+    Play(FNum, 1.0);
+  end
+end;
+
+procedure TAudioMusic.OnRender;
+begin
+  inherited;
+end;
+
+procedure TAudioMusic.OnRenderHUD;
+begin
+  inherited;
+
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, 'PgUp/PgDn - Play sample', []);
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, ORANGE, haLeft, 'Song:       %s', [TPath.GetFileName(FFilename)]);
+end;
+
+{ TAudioSound }
+procedure TAudioSound.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Sound Audio';
+end;
+
+procedure TAudioSound.OnStartup;
+var
+  LI: Integer;
+begin
+  inherited;
+
+  Audio.SetChannelReserved(0, True);
+
+  for LI := 0 to 5 do
+  begin
+    FSamples[LI] := Audio.LoadSound(Format('arc/audio/sfx/samp%d.ogg', [LI]));
+  end;
+
+  FSamples[6] := Audio.LoadSound('arc/audio/sfx/weapon_player.ogg');
+  FSamples[7] := Audio.LoadSound('arc/audio/sfx/thunder.ogg');
+  FSamples[8] := Audio.LoadSound('arc/audio/sfx/digthis.ogg');
+end;
+
+procedure TAudioSound.OnShutdown;
+var
+  LI: Integer;
+begin
+  Audio.StopAllChannels;
+
+  for LI := 0 to 8 do
+  begin
+    Audio.UnloadSound(FSamples[LI]);
+  end;
+
+  inherited;
+end;
+
+procedure TAudioSound.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  if Input.KeyboardPressed(KEY_1) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[1], 1, False);
+
+  if Input.KeyboardPressed(KEY_2) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[2], 1, False);
+
+  if Input.KeyboardPressed(KEY_3) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[3], 1, False);
+
+  if Input.KeyboardPressed(KEY_4) then
+    Audio.PlaySound(0, FSamples[0], 1, True);
+
+  if Input.KeyboardPressed(KEY_5) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[4], 1, False);
+
+  if Input.KeyboardPressed(KEY_6) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[5], 1, False);
+
+  if Input.KeyboardPressed(KEY_7) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[6], 1, False);
+
+  if Input.KeyboardPressed(KEY_8) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[7], 1, False);
+
+  if Input.KeyboardPressed(KEY_9) then
+    Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSamples[8], 1, False);
+
+  if Input.KeyboardPressed(KEY_0) then
+    Audio.StopChannel(0);
+end;
+
+procedure TAudioSound.OnRender;
+begin
+  inherited;
+end;
+
+procedure TAudioSound.OnRenderHUD;
+begin
+  inherited;
+
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, '1-9       - Play sample', []);
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, '0         - Stop looping sample', []);
 end;
 
 end.

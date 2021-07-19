@@ -51,7 +51,7 @@
   OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================================================================== }
 
-unit uUI;
+unit uGUI;
 
 interface
 
@@ -66,74 +66,157 @@ uses
   GameVision.Game,
   uCommon;
 
-type
+const
+  cGuiWindowFlags: array[0..4] of Cardinal = (GUI_WINDOW_BORDER, GUI_WINDOW_MOVABLE, GUI_WINDOW_SCALABLE, GUI_WINDOW_CLOSABLE, GUI_WINDOW_TITLE);
+  cGuiThemes: array[0..4] of string = ('Default', 'White', 'Red', 'Blue', 'Dark');
 
-  { TTemplate }
-  TTemplate = class(TCustomExample)
+type
+  { TGUIDemo }
+  TGUIDemo = class(TCustomExample)
+  protected
+    MusicVolume: Single;
+    Difficulty: Integer;
+    Chk1: Boolean;
+    Chk2: Boolean;
+    Theme: Integer;
+    ThemeChanged: Boolean;
+    FMusic: Integer;
+    FSfx: Integer;
+    FStarfield: TStarfield;
   public
     procedure OnSetConfig(var aConfig: TGameConfig); override;
     procedure OnLoad; override;
     procedure OnExit; override;
     procedure OnStartup; override;
     procedure OnShutdown; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
     procedure OnRender; override;
     procedure OnRenderHUD; override;
-    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnProcessIMGUI; override;
   end;
 
 implementation
 
-{ TTemplate }
-procedure TTemplate.OnSetConfig(var aConfig: TGameConfig);
+{ TGUIDemo }
+ procedure TGUIDemo.OnSetConfig(var aConfig: TGameConfig);
 begin
   inherited;
 
-  aConfig.DisplayTitle := cExampleTitle + 'Example Template';
+  aConfig.DisplayTitle := cExampleTitle + 'GUI Demo';
+  aConfig.DisplayClearColor := BLACK;
 end;
 
-procedure TTemplate.OnLoad;
+procedure TGUIDemo.OnLoad;
 begin
   inherited;
 
+  MusicVolume := 0.3;
+  Difficulty := 0;
+  Chk1 := False;
+  Chk2 := False;
+  Theme := 0;
+  ThemeChanged := False;
 end;
 
-procedure TTemplate.OnExit;
-begin
-  inherited;
-
-end;
-
-procedure TTemplate.OnStartup;
-begin
-  inherited;
-
-end;
-
-procedure TTemplate.OnShutdown;
+procedure TGUIDemo.OnExit;
 begin
   inherited;
 
 end;
 
-procedure TTemplate.OnRender;
+procedure TGUIDemo.OnStartup;
+begin
+  inherited;
+
+  FStarfield := TStarfield.Create;
+  FSfx := Audio.LoadSound('arc/audio/sfx/digthis.ogg');
+
+  FMusic := Audio.LoadMusic('arc/audio/music/song07.ogg');
+  Audio.PlayMusic(FMusic, MusicVolume, True);
+end;
+
+procedure TGUIDemo.OnShutdown;
+begin
+  Audio.UnloadMusic(FMusic);
+  Audio.UnloadSound(FSfx);
+  FreeAndNil(FStarfield);
+
+  inherited;
+end;
+
+procedure TGUIDemo.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  FStarfield.Update(aDeltaTime);
+end;
+
+procedure TGUIDemo.OnRender;
+begin
+  inherited;
+
+  FStarfield.Render;
+
+  Display.DrawFilledRectangle((Config.DisplayWidth/2)-50, (Config.DisplayHeight/2)-50, 100, 100, DARKGREEN);
+end;
+
+procedure TGUIDemo.OnRenderHUD;
 begin
   inherited;
 
 end;
 
-
-procedure TTemplate.OnRenderHUD;
+procedure TGUIDemo.OnProcessIMGUI;
 begin
-  inherited;
+  if GUI.WindowBegin('Window 1', 'Window 1', 50, 50, 270, 220, cGuiWindowFlags) then
+  begin
+    GUI.LayoutRowStatic(30, 80, 2);
+    GUI.Button('One');
+    GUI.Button('Two');
 
+    GUI.LayoutRowDynamic(30, 2);
+    if GUI.Option('easy', Boolean(Difficulty = 0)) then
+      Difficulty := 0;
+
+    if GUI.Option('hard', Boolean(Difficulty = 1)) then
+      Difficulty := 1;
+
+    GUI.LayoutRowBegin(GUI_STATIC, 30, 2);
+    GUI.LayoutRowPush(50);
+    GUI.&Label('Volume:', GUI_TEXT_LEFT);
+    GUI.LayoutRowPush(110);
+    if GUI.Slider(0, 1, 0.01, MusicVolume) then
+      Audio.SetMusicVolume(FMusic, MusicVolume);
+    GUI.LayoutRowPush(120);
+    if GUI.Checkbox('Dig this', chk1) then
+    begin
+      if chk1 then
+      begin
+        Audio.PlaySound(AUDIO_DYNAMIC_CHANNEL, FSfx, 0.5, False);
+      end;
+    end;
+    GUI.Checkbox('Change theme', chk2);
+    GUI.LayoutRowEnd;
+  end;
+  GUI.WindowEnd;
+
+  if chk2 then
+  begin
+    if GUI.WindowBegin('Window 2', 'Window 2', 350, 150, 320, 220, cGuiWindowFlags) then
+      begin
+       GUI.LayoutRowStatic(25, 190, 1);
+       Theme := GUI.Combobox(cGuiThemes, Theme, 25, 200, 200, ThemeChanged);
+      end
+    else
+      begin
+       chk2 := False;
+      end;
+    GUI.WindowEnd;
+
+    if ThemeChanged then
+      GUI.SetStyle(Theme);
+  end;
 end;
-
-procedure TTemplate.OnUpdate(aDeltaTime: Double);
-begin
-  inherited;
-
-end;
-
 
 
 end.

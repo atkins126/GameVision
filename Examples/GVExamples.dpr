@@ -80,14 +80,16 @@ uses
   uGraphics in 'uGraphics.pas',
   uInput in 'uInput.pas',
   uSystem in 'uSystem.pas',
-  uUI in 'uUI.pas',
+  uGUI in 'uGUI.pas',
   uNetwork in 'uNetwork.pas',
   GameVision.CLib.CSFMLAudio in '..\sources\GameVision.CLib.CSFMLAudio.pas',
   uElastic in 'uElastic.pas',
   uAstroBlaster in 'uAstroBlaster.pas',
   uChainAction in 'uChainAction.pas',
   uScroll in 'uScroll.pas',
-  uViewports in 'uViewports.pas';
+  uViewports in 'uViewports.pas',
+  uGame in 'uGame.pas',
+  uUI in 'uUI.pas';
 
 begin
   try

@@ -209,6 +209,65 @@ type
     procedure OnUpdate(aDeltaTime: Double); override;
   end;
 
+  { TEntityBasic }
+  TEntityBasic = class(TCustomExample)
+  protected
+    FShip: TEntity;
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+  end;
+
+  { TEntityBlendMode }
+  TEntityBlendMode = class(TCustomExample)
+  protected
+    FBlendMode: Boolean;
+    FExplo: TEntity;
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+  end;
+
+  { TEntityPolyPointCollision }
+  TEntityPolyPointCollision = class(TCustomExample)
+  protected
+    FBoss: TEntity;
+    FFigure: TEntity;
+    FFigureAngle: Single;
+    FCollide: Boolean;
+    FHitPos: TVector;
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+  end;
+
+  { TEntityPolyPointCollisionPoint }
+  TEntityPolyPointCollisionPoint = class(TCustomExample)
+  protected
+    FFigure: TEntity;
+    FFigureAngle: Single;
+    FCollide: Boolean;
+    FHitPos: TVector;
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+  end;
 
 
 implementation
@@ -791,6 +850,306 @@ procedure TFontUnicode.OnUpdate(aDeltaTime: Double);
 begin
   inherited;
 
+end;
+
+{ TEntityBasic }
+procedure TEntityBasic.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Basic Entity';
+  aConfig.DisplayClearColor := BLACK;
+end;
+
+procedure TEntityBasic.OnStartup;
+begin
+  inherited;
+
+  // init ship sprite
+  Sprite.LoadPage('arc/bitmaps/sprites/ship.png', nil);
+  Sprite.AddGroup;
+  Sprite.AddImageFromGrid(0, 0, 0, 0, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 1, 0, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 2, 0, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 3, 0, 64, 64);
+
+  // init ship entity
+  FShip := TEntity.Create;
+  FShip.Init(Sprite, 0);
+  FShip.SetFrameFPS(17);
+  FShip.SetScaleAbs(1);
+  FShip.SetPosAbs(Config.DisplayWidth/2, Config.DisplayHeight/2);
+  FShip.SetFrameRange(1, 3);
+end;
+
+procedure TEntityBasic.OnShutdown;
+begin
+  FreeAndNil(FShip);
+
+  inherited;
+end;
+
+procedure TEntityBasic.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  FShip.NextFrame;
+end;
+
+procedure TEntityBasic.OnRender;
+begin
+  inherited;
+
+  FShip.Render(0, 0);
+end;
+
+procedure TEntityBasic.OnRenderHUD;
+begin
+  inherited;
+
+end;
+
+
+{ TEntityPolyPointCollision }
+procedure TEntityPolyPointCollision.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Entity Collision';
+end;
+
+procedure TEntityPolyPointCollision.OnStartup;
+begin
+  inherited;
+
+  // init boss sprite
+  Sprite.LoadPage('arc/bitmaps/sprites/boss.png', @COLORKEY);
+  Sprite.AddGroup;
+  Sprite.AddImageFromGrid(0, 0, 0, 0, 128, 128);
+  Sprite.AddImageFromGrid(0, 0, 1, 0, 128, 128);
+  Sprite.AddImageFromGrid(0, 0, 0, 1, 128, 128);
+
+  // init figure sprite
+  Sprite.LoadPage('arc/bitmaps/sprites/figure.png', @COLORKEY);
+  Sprite.AddGroup;
+  Sprite.AddImageFromGrid(1, 1, 0, 0, 128, 128);
+
+  // init boss entity
+  FBoss := TEntity.Create;
+  FBoss.Init(Sprite, 0);
+  FBoss.SetFrameFPS(14);
+  FBoss.SetScaleAbs(1);
+  FBoss.SetPosAbs(Config.DisplayWidth/2, (Config.DisplayHeight/2)-100);
+  FBoss.TracePolyPoint(6, 12, 70);
+  FBoss.SetRenderPolyPoint(True);
+
+  // init figure entity
+  FFigure := TEntity.Create;
+  FFigure.Init(Sprite, 1);
+  FFigure.SetFrameFPS(17);
+  FFigure.SetScaleAbs(1);
+  FFigure.SetPosAbs(Config.DisplayWidth/2, Config.DisplayHeight/2);
+  FFigure.TracePolyPoint(6, 12, 70);
+  FFigure.SetRenderPolyPoint(True);
+end;
+
+procedure TEntityPolyPointCollision.OnShutdown;
+begin
+  FreeAndNil(FFigure);
+  FreeAndNil(FBoss);
+
+  inherited;
+end;
+
+procedure TEntityPolyPointCollision.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  FBoss.NextFrame;
+  FBoss.ThrustToPos(30*50, 14*50, MousePos.X, MousePos.Y, 128, 32, 5*50, 0.001, aDeltaTime);
+  if FBoss.CollidePolyPoint(FFigure, FHitPos) then
+    FCollide := True
+  else
+    FCollide := False;
+
+  FFigureAngle := FFigureAngle + (30.0 * aDeltaTime);
+  Math.ClipValue(FFigureAngle, 0, 359, True);
+  FFigure.RotateAbs(FFigureAngle);
+end;
+
+procedure TEntityPolyPointCollision.OnRender;
+begin
+  inherited;
+
+  FFigure.Render(0, 0);
+  FBoss.Render(0, 0);
+  if FCollide then Display.DrawFilledRectangle(FHitPos.X, FHitPos.Y, 10, 10, RED);
+end;
+
+procedure TEntityPolyPointCollision.OnRenderHUD;
+begin
+  inherited;
+
+end;
+
+
+{ TEntityPolyPointCollisionPoint }
+procedure TEntityPolyPointCollisionPoint.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Entity Collision Point';
+end;
+
+procedure TEntityPolyPointCollisionPoint.OnStartup;
+begin
+  inherited;
+
+  // init figure sprite
+  Sprite.LoadPage('arc/bitmaps/sprites/figure.png', @COLORKEY);
+  Sprite.AddGroup;
+  Sprite.AddImageFromGrid(0, 0, 0, 0, 128, 128);
+
+  // init figure entity
+  FFigure := TEntity.Create;
+  FFigure.Init(Sprite, 0);
+  FFigure.SetFrameFPS(17);
+  FFigure.SetScaleAbs(1);
+  FFigure.SetPosAbs(Config.DisplayWidth/2, Config.DisplayHeight/2);
+  FFigure.TracePolyPoint(6, 12, 70);
+  FFigure.SetRenderPolyPoint(True);
+end;
+
+procedure TEntityPolyPointCollisionPoint.OnShutdown;
+begin
+  FreeAndNil(FFigure);
+
+  inherited;
+end;
+
+procedure TEntityPolyPointCollisionPoint.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  FHitPos.Assign(MousePos);
+
+  if FFigure.CollidePolyPointPoint(FHitPos) then
+    FCollide := True
+  else
+    FCollide := False;
+
+  FFigureAngle := FFigureAngle + (30.0 * aDeltaTime);
+  Math.ClipValue(FFigureAngle, 0, 359, True);
+  FFigure.RotateAbs(FFigureAngle);
+end;
+
+procedure TEntityPolyPointCollisionPoint.OnRender;
+var
+  LPos: TVector;
+begin
+  inherited;
+
+  FFigure.Render(0, 0);
+  if FCollide then
+  begin
+    LPos := FFigure.GetPos;
+    Font.Print(LPos.X-64, LPos.Y-64, WHITE, haLeft, '(%3f,%3f)', [FHitPos.X, FHitPos.Y]);
+    Display.DrawFilledRectangle(FHitPos.X, FHitPos.Y, 10, 10, RED);
+  end;
+end;
+
+procedure TEntityPolyPointCollisionPoint.OnRenderHUD;
+begin
+  inherited;
+
+  Font.Print(Config.DisplayWidth/2, (Config.DisplayHeight/2) - 100, YELLOW, haCenter, 'Move mouse pointer over figure outline', []);
+end;
+
+
+{ TEntityBlendMode }
+procedure TEntityBlendMode.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Entity Blend Mode';
+end;
+
+procedure TEntityBlendMode.OnStartup;
+begin
+  inherited;
+
+  // init explosion sprite
+  Sprite.LoadPage('arc/bitmaps/sprites/explosion.png', nil);
+  Sprite.AddGroup;
+  Sprite.AddImageFromGrid(0, 0, 0, 0, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 1, 0, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 2, 0, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 3, 0, 64, 64);
+
+  Sprite.AddImageFromGrid(0, 0, 0, 1, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 1, 1, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 2, 1, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 3, 1, 64, 64);
+
+  Sprite.AddImageFromGrid(0, 0, 0, 2, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 1, 2, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 2, 2, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 3, 2, 64, 64);
+
+  Sprite.AddImageFromGrid(0, 0, 0, 3, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 1, 3, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 2, 3, 64, 64);
+  Sprite.AddImageFromGrid(0, 0, 3, 3, 64, 64);
+
+  // init explosion entity
+  FExplo := TEntity.Create;
+  FExplo.Init(Sprite, 0);
+  FExplo.SetFrameFPS(14);
+  FExplo.SetScaleAbs(1);
+  FExplo.SetPosAbs(Config.DisplayWidth/2, Config.DisplayHeight/2);
+
+  FBlendMode := False;
+end;
+
+procedure TEntityBlendMode.OnShutdown;
+begin
+  FreeAndNil(FExplo);
+
+  inherited;
+end;
+
+procedure TEntityBlendMode.OnUpdate(aDeltaTime: Double);
+begin
+  inherited;
+
+  if Input.KeyboardPressed(KEY_B) then
+  begin
+    FBlendMode := not FBlendMode;
+  end;
+
+  FExplo.NextFrame;
+end;
+
+procedure TEntityBlendMode.OnRender;
+begin
+  inherited;
+
+  if FBlendMode then Display.SetBlendMode(bmAdditiveAlpha);
+  FExplo.SetPosAbs(Config.DisplayWidth/2, Config.DisplayHeight/2);
+  FExplo.Render(0,0);
+
+  FExplo.SetPosAbs((Config.DisplayWidth/2)+16, (Config.DisplayHeight/2)+16);
+  FExplo.Render(0,0);
+
+  Display.RestoreDefaultBlendMode;
+end;
+
+procedure TEntityBlendMode.OnRenderHUD;
+begin
+  inherited;
+
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN,  haLeft, 'B         - Toggle blending', []);
+  Font.Print(HudPos.X, HudPos.Y, HudPos.Z, YELLOW, haLeft, 'Blend:      %s', [cTrueFalseStr[FBlendMode]]);
 end;
 
 end.

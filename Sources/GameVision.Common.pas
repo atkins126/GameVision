@@ -107,6 +107,8 @@ const
   cPngExt = 'png';
   cCfgExt = 'cfg';
 
+  cTrueFalseStr: array [False .. True] of string = ('False', 'True');
+
 type
   { TStringArray }
   TStringArray = array of string;

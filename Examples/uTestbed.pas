@@ -75,7 +75,9 @@ uses
   uAstroBlaster,
   uChainAction,
   uScroll,
-  uViewports;
+  uViewports,
+  uGame,
+  uGUI;
 
 type
   { TTestbed }
@@ -133,9 +135,14 @@ end;
 function  TTestbed.OnStartupDialogRun: Boolean;
 type
   TMenuItems = (
+    // game
+    miGame_ActorBasic,
+
     // audio
     miAudio_Testbed,
     miAudio_Positional,
+    miAudio_Sound,
+    miAudio_Music,
 
     // graphics
       // bitmap
@@ -151,6 +158,12 @@ type
       // font
       miGraphics_FontUnicode,
 
+      // entity
+      miGraphics_EntityBasic,
+      miGraphics_EntityBlendMode,
+      miGraphics_EntityPPCollision,
+      miGraphics_EntityPPCollisionPoint,
+
     // input
 
     // system
@@ -162,14 +175,18 @@ type
     miDemo_AstroBlaster,
     miDemo_ChainAction,
     miDemo_Scroll,
-    miDemo_MultiViewports
+    miDemo_MultiViewports,
+    miDemo_GUI
     );
 var
   LTreeMenu: TTreeMenu;
+  LGame: Integer;
+  LGame_Actor: Integer;
   LAudio: Integer;
   LGraphics: Integer;
   LGraphics_Bitmap: Integer;
   LGraphics_Font: Integer;
+  LGraphics_Entity: Integer;
   LInput: Integer;
   LSystem: Integer;
   LUI: Integer;
@@ -181,23 +198,33 @@ begin
   LTreeMenu.SetTitle(cAppTitle);
   LTreeMenu.SetStatus('Select an item to test');
   try
+    // game
+    LGame := LTreeMenu.AddItem(0, 'Game', TREEMENU_NONE, True);
+      LGame_Actor := LTreeMenu.AddItem(LGame, 'Actor', TREEMENU_NONE, True);
+        LTreeMenu.AddItem(LGame_Actor, 'Basic', Ord(miGame_ActorBasic), True);
+      LTreeMenu.Sort(LGame_Actor);
+    LTreeMenu.Sort(LGame);
+
     // audio
     LAudio := LTreeMenu.AddItem(0, 'Audio', TREEMENU_NONE, True);
-      LTreeMenu.AddItem(LAudio, 'Testbed', Ord(miAudio_Testbed), True);
+      //LTreeMenu.AddItem(LAudio, 'Testbed', Ord(miAudio_Testbed), True);
       LTreeMenu.AddItem(LAudio, 'Positional', Ord(miAudio_Positional), True);
+      LTreeMenu.AddItem(LAudio, 'Sound', Ord(miAudio_Sound), True);
+      LTreeMenu.AddItem(LAudio, 'Music', Ord(miAudio_Music), True);
     LTreeMenu.Sort(LAudio);
 
     // graphics
     LGraphics := LTreeMenu.AddItem(0, 'Graphics', TREEMENU_NONE, True);
+      // bitmap
       LGraphics_Bitmap := LTreeMenu.AddItem(LGraphics, 'Bitmap', TREEMENU_NONE, True);
         LTreeMenu.AddItem(LGraphics_Bitmap, 'Tiled', Ord(miGraphics_BitmapTiled), True);
-        LTreeMenu.AddItem(LGraphics_Bitmap, 'Flipped', Ord(miGraphics_BitmapFlipped), True);
-        LTreeMenu.AddItem(LGraphics_Bitmap, 'Allocate', Ord(miGraphics_BitmapAllocate), True);
-        LTreeMenu.AddItem(LGraphics_Bitmap, 'Getpixel', Ord(miGraphics_BitmapGetPixel), True);
-        LTreeMenu.AddItem(LGraphics_Bitmap, 'Setpixel', Ord(miGraphics_BitmapSetPixel), True);
+        LTreeMenu.AddItem(LGraphics_Bitmap, 'Flipped', Ord(miGraphics_BitmapFlipped), False);
+        LTreeMenu.AddItem(LGraphics_Bitmap, 'Allocate', Ord(miGraphics_BitmapAllocate), False);
+        LTreeMenu.AddItem(LGraphics_Bitmap, 'Getpixel', Ord(miGraphics_BitmapGetPixel), False);
+        LTreeMenu.AddItem(LGraphics_Bitmap, 'Setpixel', Ord(miGraphics_BitmapSetPixel), False);
         LTreeMenu.AddItem(LGraphics_Bitmap, 'Transparancey: PNG', Ord(miGraphics_BitmapPNGTrans), True);
         LTreeMenu.AddItem(LGraphics_Bitmap, 'Transparancy: ColorKey', Ord(miGraphics_BitmapColorKeyTrans), True);
-        LTreeMenu.AddItem(LGraphics_Bitmap, 'Alignment', Ord(miGraphics_BitmapAlignment), True);
+        LTreeMenu.AddItem(LGraphics_Bitmap, 'Alignment', Ord(miGraphics_BitmapAlignment), False);
       LTreeMenu.Sort(LGraphics_Bitmap);
 
       // font
@@ -205,22 +232,31 @@ begin
         LTreeMenu.AddItem(LGraphics_Font, 'Unicode', Ord(miGraphics_FontUnicode), True);
       LTreeMenu.Sort(LGraphics_Font);
 
+      // entity
+      LGraphics_Entity := LTreeMenu.AddItem(LGraphics, 'Entity', TREEMENU_NONE, True);
+        LTreeMenu.AddItem(LGraphics_Entity, 'Basic', Ord(miGraphics_EntityBasic), True);
+        LTreeMenu.AddItem(LGraphics_Entity, 'BlendMode', Ord(miGraphics_EntityBlendMode), True);
+        LTreeMenu.AddItem(LGraphics_Entity, 'PolyPointCollision', Ord(miGraphics_EntityPPCollision), True);
+        LTreeMenu.AddItem(LGraphics_Entity, 'PolyPointCollisionPoint', Ord(miGraphics_EntityPPCollisionPoint), True);
+      LTreeMenu.Sort(LGraphics_Entity);
+
+
     LTreeMenu.Sort(LGraphics);
 
     // input
-    LInput := LTreeMenu.AddItem(0, 'Input', TREEMENU_NONE, True);
+    LInput := LTreeMenu.AddItem(0, 'Input', TREEMENU_NONE, False);
     LTreeMenu.Sort(LInput);
 
     // system
-    LSystem := LTreeMenu.AddItem(0, 'System', TREEMENU_NONE, True);
+    LSystem := LTreeMenu.AddItem(0, 'System', TREEMENU_NONE, False);
     LTreeMenu.Sort(LSystem);
 
     // ui
-    LUI := LTreeMenu.AddItem(0, 'UI', TREEMENU_NONE, True);
+    LUI := LTreeMenu.AddItem(0, 'UI', TREEMENU_NONE, False);
     LTreeMenu.Sort(LUI);
 
     // network
-    LNetwork := LTreeMenu.AddItem(0, 'Network', TREEMENU_NONE, True);
+    LNetwork := LTreeMenu.AddItem(0, 'Network', TREEMENU_NONE, False);
     LTreeMenu.Sort(LNetwork);
 
     // sort list
@@ -233,15 +269,21 @@ begin
       LTreeMenu.AddItem(LDemos, 'ChainAction', Ord(miDemo_ChainAction), True);
       LTreeMenu.AddItem(LDemos, 'Scroll', Ord(miDemo_Scroll), True);
       LTreeMenu.AddItem(LDemos, 'MultiViewports', Ord(miDemo_MultiViewports), True);
+      LTreeMenu.AddItem(LDemos, 'GUI', Ord(miDemo_GUI), True);
     LTreeMenu.Sort(LDemos);
 
     LSelItem := ConfigFile.GetValue('TreeMenu', 'SelItem', TREEMENU_NONE);
     repeat
       LSelItem := LTreeMenu.Show(LSelItem);
       case TMenuItems(LSelItem) of
+        // actor
+        miGame_ActorBasic             : Engine.RunGame(TGameActorBasic);
+
         // audio
         miAudio_Testbed                : Engine.RunGame(TAudioTestbed);
         miAudio_Positional             : Engine.RunGame(TAudioPositional);
+        miAudio_Sound                  : Engine.RunGame(TAudioSound);
+        miAudio_Music                  : Engine.RunGame(TAudioMusic);
 
         // bitmap
         miGraphics_BitmapTiled         : Engine.RunGame(TBitmapTiled);
@@ -256,12 +298,19 @@ begin
         // font
         miGraphics_FontUnicode         : Engine.RunGame(TFontUnicode);
 
+        // entity
+        miGraphics_EntityBasic         : Engine.RunGame(TEntityBasic);
+        miGraphics_EntityBlendMode     : Engine.RunGame(TEntityBlendMode);
+        miGraphics_EntityPPCollision   : Engine.RunGame(TEntityPolyPointCollision);
+        miGraphics_EntityPPCollisionPoint: Engine.RunGame(TEntityPolyPointCollisionPoint);
+
         // demos
         miDemo_Elastic                 : Engine.RunGame(TElastic);
         miDemo_AstroBlaster            : Engine.RunGame(TAstroBlaster);
         miDemo_ChainAction             : Engine.RunGame(TChainAction);
         miDemo_Scroll                  : Engine.RunGame(TScroll);
         miDemo_MultiViewports          : Engine.RunGame(TMultiViewports);
+        miDemo_GUI                     : Engine.RunGame(TGUIDemo);
       end;
     until LSelItem = TREEMENU_QUIT;
     ConfigFile.SetValue('TreeMenu', 'SelItem', LTreeMenu.GetLastSelectedId);
