@@ -216,7 +216,7 @@ type
 
   { TAstroBlaster }
 { TAstroBlasterDemo }
-  TAstroBlasterDemo = class(TCustomExample)
+  TAstroBlaster = class(TCustomExample)
   protected
     FBkPos: TVector;
     FBkColor: TColor;
@@ -256,7 +256,7 @@ const
 
 var
   Player: TPlayer;
-  Game: TAstroBlasterDemo;
+  Game: TAstroBlaster;
 
 
 function RandomRangedslNP(aMin, aMax: Single): Single;
@@ -800,21 +800,21 @@ end;
 
 
 { TAstroBlasterDemo }
-constructor TAstroBlasterDemo.Create;
+constructor TAstroBlaster.Create;
 begin
   inherited;
 
   Game := Self;
 end;
 
-destructor TAstroBlasterDemo.Destroy;
+destructor TAstroBlaster.Destroy;
 begin
   Game := nil;
 
   inherited;
 end;
 
-procedure TAstroBlasterDemo.OnSetConfig(var aConfig: TGameConfig);
+procedure TAstroBlaster.OnSetConfig(var aConfig: TGameConfig);
 begin
   inherited;
 
@@ -823,17 +823,17 @@ begin
   aConfig.SceneCount := cSceneCount;
 end;
 
-procedure TAstroBlasterDemo.OnLoad;
+procedure TAstroBlaster.OnLoad;
 begin
   inherited;
 end;
 
-procedure TAstroBlasterDemo.OnExit;
+procedure TAstroBlaster.OnExit;
 begin
   inherited;
 end;
 
-procedure TAstroBlasterDemo.OnStartup;
+procedure TAstroBlaster.OnStartup;
 begin
   inherited;
 
@@ -928,7 +928,7 @@ begin
   //Scene.Alloc(cSceneCount);
 end;
 
-procedure TAstroBlasterDemo.OnShutdown;
+procedure TAstroBlaster.OnShutdown;
 begin
   Scene.ClearAll;
 
@@ -948,7 +948,7 @@ begin
   inherited;
 end;
 
-procedure TAstroBlasterDemo.OnUpdate(aDeltaTime: Double);
+procedure TAstroBlaster.OnUpdate(aDeltaTime: Double);
 var
   LP: TVector;
 begin
@@ -971,8 +971,10 @@ end;
 const
   mBM = 3;
 
-procedure TAstroBlasterDemo.OnRender;
+procedure TAstroBlaster.OnRender;
 begin
+  TBitmap.EnableDrawDeferred(True);
+
   // render background
   Background[0].DrawTiled(-(FBkPos.X/1.9*mBM), -(FBkPos.Y/1.9*mBM));
 
@@ -982,13 +984,15 @@ begin
   Background[2].DrawTiled(-(FBkPos.X/1.6*mBM), -(FBkPos.Y/1.6*mBM));
   Background[3].DrawTiled(-(FBkPos.X/1.3*mBM), -(FBkPos.Y/1.3*mBM));
 
-  //Scene.Render([], OnBeforeRenderScene, OnAfterRenderScene);
+  TBitmap.EnableDrawDeferred(False);
 
   inherited;
 end;
 
-procedure TAstroBlasterDemo.OnRenderHUD;
+procedure TAstroBlaster.OnRenderHUD;
 begin
+  TBitmap.EnableDrawDeferred(True);
+
   inherited;
 
   Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, 'Left      - Rotate left', []);
@@ -996,29 +1000,36 @@ begin
   Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, 'Up        - Thrust', []);
   Font.Print(HudPos.X, HudPos.Y, HudPos.Z, GREEN, haLeft, 'Ctrl      - Fire', []);
   Font.Print(HudPos.X, HudPos.Y, HudPos.Z, YELLOW, haLeft, 'Count:      %d', [Scene[cSceneRocks].Count]);
+
+  TBitmap.EnableDrawDeferred(False);
+
 end;
 
-procedure TAstroBlasterDemo.OnBeforeRenderScene(aSceneNum: Integer);
+procedure TAstroBlaster.OnBeforeRenderScene(aSceneNum: Integer);
 begin
   case aSceneNum of
     cSceneRockExp:
     begin
       Display.SetBlendMode(bmAdditiveAlpha);
-    end;
+    end
+  else
+    TBitmap.EnableDrawDeferred(True);
   end;
 end;
 
-procedure TAstroBlasterDemo.OnAfterRenderScene(aSceneNum: Integer);
+procedure TAstroBlaster.OnAfterRenderScene(aSceneNum: Integer);
 begin
   case aSceneNum of
     cSceneRockExp:
     begin
       Display.RestoreDefaultBlendMode;
-    end;
+    end
+  else
+    TBitmap.EnableDrawDeferred(False);
   end;
 end;
 
-procedure TAstroBlasterDemo.SpawnRocks;
+procedure TAstroBlaster.SpawnRocks;
 var
   LI, LC: Integer;
   LId: Integer;
@@ -1049,19 +1060,19 @@ begin
   end;
 end;
 
-procedure TAstroBlasterDemo.SpawnPlayer;
+procedure TAstroBlaster.SpawnPlayer;
 begin
   Scene.Lists[cScenePlayer].Add(TPlayer.Create);
 end;
 
-procedure TAstroBlasterDemo.SpawnLevel;
+procedure TAstroBlaster.SpawnLevel;
 begin
   Scene.ClearAll;
   SpawnRocks;
   SpawnPlayer;
 end;
 
-function TAstroBlasterDemo.LevelCleared: Boolean;
+function TAstroBlaster.LevelCleared: Boolean;
 begin
   if (Scene[cSceneRocks].Count        > 0) or
      (Scene[cSceneRockExp].Count      > 0) or

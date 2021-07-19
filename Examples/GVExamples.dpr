@@ -85,7 +85,9 @@ uses
   GameVision.CLib.CSFMLAudio in '..\sources\GameVision.CLib.CSFMLAudio.pas',
   uElastic in 'uElastic.pas',
   uAstroBlaster in 'uAstroBlaster.pas',
-  uChainAction in 'uChainAction.pas';
+  uChainAction in 'uChainAction.pas',
+  uScroll in 'uScroll.pas',
+  uViewports in 'uViewports.pas';
 
 begin
   try

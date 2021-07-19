@@ -278,6 +278,8 @@ type
     procedure DrawTiled(aDeltaX: Single; aDeltaY: Single);
 
     class function LoadBitmap(aFilename: string; aColorKey: PColor): TBitmap; inline;
+    class procedure EnableDrawDeferred(aEnable: Boolean);
+    class function IsDrawDeferred: Boolean;
   end;
 
 { === VIEWPORT ============================================================== }
@@ -456,29 +458,8 @@ type
 
     function  GetTextWidth(const aMsg: string; const aArgs: array of const): Single;
     function  GetLineHeight: Single;
-  end;
 
-{ --- SCALEDFONT ------------------------------------------------------------ }
-type
-  { TScaledFont }
-  TScaledFont = class(TBaseObject)
-  protected
-    FFont: array[ False..True ] of TFont;
-  public
-    constructor Create; override;
-    destructor Destroy; override;
-
-    procedure Load(aSize: Cardinal); overload;
-    procedure Load(aSize: Cardinal; aFilename: string); overload;
-    procedure Load(aSize: Cardinal; aMemory: Pointer; aLength: Int64); overload;
-
-    procedure Unload;
-    procedure Print(aX: Single; aY: Single; aColor: TColor; aAlign: THAlign; const aMsg: string; const aArgs: array of const); overload;
-    procedure Print(aX: Single; var aY: Single; aLineSpace: Single; aColor: TColor; aAlign: THAlign; const aMsg: string; const aArgs: array of const); overload;
-    procedure Print(aX: Single; aY: Single; aColor: TColor; aAngle: Single; const aMsg: string; const aArgs: array of const); overload;
-
-    function  GetTextWidth(const aMsg: string; const aArgs: array of const): Single;
-    function  GetLineHeight: Single;
+    class function LoadFont(aSize: Cardinal; aFilename: string): TFont;
   end;
 
 { --- TEXT ------------------------------------------------------------------ }
@@ -1519,6 +1500,16 @@ begin
   Result.Load(aFilename, aColorKey);
 end;
 
+class procedure TBitmap.EnableDrawDeferred(aEnable: Boolean);
+begin
+  al_hold_bitmap_drawing(aEnable);
+end;
+
+class function TBitmap.IsDrawDeferred: Boolean;
+begin
+  Result := al_is_bitmap_drawing_held;
+end;
+
 { --- DISPLAY --------------------------------------------------------------- }
 { Display }
 class procedure Display.ResizeForDPI;
@@ -2378,6 +2369,32 @@ begin
     Result := al_get_font_line_height(FHandle) + FPadding.Y;
 end;
 
+//procedure TFont.Print(aX: Single; aY: Single; aColor: TColor; aAngle: Single; const aMsg: string; const aArgs: array of const);
+//var
+//  LUstr: PALLEGRO_USTR;
+//  LText: string;
+//  LFX, LFY: Single;
+//  LTR: ALLEGRO_TRANSFORM;
+//  LColor: ALLEGRO_COLOR absolute aColor;
+//begin
+//  if FHandle = nil then Exit;
+//  LText := Format(aMsg, aArgs);
+//  if LText.IsEmpty then Exit;
+//  LFX := GetTextWidth(LText, []) / 2;
+//  LFY := GetLineHeight / 2;
+//  al_identity_transform(@LTR);
+//  al_translate_transform(@LTR, -LFX, -LFY);
+//  al_rotate_transform(@LTR, aAngle * DEG2RAD);
+//  Math.AngleRotatePos(aAngle, LFX, LFY);
+//  al_translate_transform(@LTR, aX + LFX, aY + LFY);
+//  al_compose_transform(@LTR, @Display.GetTrans);
+//  al_use_transform(@LTR);
+//  LUstr := al_ustr_new_from_utf16(PUInt16(PChar(LText)));
+//  al_draw_ustr(FHandle, LColor, 0, 0, ALLEGRO_ALIGN_LEFT or ALLEGRO_ALIGN_INTEGER, LUstr);
+//  al_ustr_free(LUstr);
+//  al_use_transform(@Display.GetTrans);
+//end;
+
 procedure TFont.Print(aX: Single; aY: Single; aColor: TColor; aAngle: Single; const aMsg: string; const aArgs: array of const);
 var
   LUstr: PALLEGRO_USTR;
@@ -2404,75 +2421,12 @@ begin
   al_use_transform(@Display.GetTrans);
 end;
 
-{ --- SCALEDFONT ------------------------------------------------------------ }
-constructor TScaledFont.Create;
+class function TFont.LoadFont(aSize: Cardinal; aFilename: string): TFont;
 begin
-  inherited;
-  FFont[False] := TFont.Create;
-  FFont[True] := TFont.Create;
-  Load(20);
+  Result := TFont.Create;
+  Result.Load(aSize, aFilename);
 end;
 
-destructor TScaledFont.Destroy;
-begin
-  FreeAndNil(FFont[True]);
-  FreeAndNil(FFont[False]);
-  inherited;
-end;
-
-procedure TScaledFont.Load(aSize: Cardinal);
-begin
-  FFont[False].Load(aSize);
-  FFont[True].Load(Trunc(aSize * Display.GetUpScale));
-end;
-
-procedure TScaledFont.Load(aSize: Cardinal; aFilename: string);
-begin
-  FFont[False].Load(aSize, aFilename);
-  FFont[True].Load(Trunc(aSize * Display.GetUpScale), aFilename);
-end;
-
-procedure TScaledFont.Load(aSize: Cardinal; aMemory: Pointer; aLength: Int64);
-begin
-  FFont[False].Load(aSize, aMemory, aLength);
-  FFont[True].Load(Trunc(aSize * Display.GetUpScale), aMemory, aLength);
-end;
-
-procedure TScaledFont.Unload;
-begin
-  FFont[False].Unload;
-  FFont[True].Unload;
-end;
-
-procedure TScaledFont.Print(aX: Single; aY: Single; aColor: TColor; aAlign: THAlign; const aMsg: string; const aArgs: array of const);
-begin
-  var LUpScale: Single;
-  if Display.GetFullscreen then LUpScale := Display.GetUpScale else LUpScale := 1;
-  FFont[Display.GetFullscreen].Print(aX, aY*LUpScale, aColor, aAlign, aMsg, aArgs);
-end;
-
-procedure TScaledFont.Print(aX: Single; var aY: Single; aLineSpace: Single; aColor: TColor; aAlign: THAlign; const aMsg: string; const aArgs: array of const);
-begin
-  FFont[Display.GetFullscreen].Print(aX, aY, aLineSpace, aColor, aAlign, aMsg, aArgs);
-end;
-
-procedure TScaledFont.Print(aX: Single; aY: Single; aColor: TColor; aAngle: Single; const aMsg: string; const aArgs: array of const);
-begin
-  var LUpScale: Single;
-  if Display.GetFullscreen then LUpScale := Display.GetUpScale else LUpScale := 1;
-  FFont[Display.GetFullscreen].Print(aX, aY*LUpScale, aColor, aAngle, aMsg, aArgs);
-end;
-
-function  TScaledFont.GetTextWidth(const aMsg: string; const aArgs: array of const): Single;
-begin
-  Result := FFont[Display.GetFullscreen].GetTextWidth(aMsg, aArgs);
-
-end;
-
-function  TScaledFont.GetLineHeight: Single;
-begin
-  Result := FFont[Display.GetFullscreen].GetLineHeight;
-end;
 
 { --- TEXT ------------------------------------------------------------------ }
 { TTextItem }

@@ -73,7 +73,9 @@ uses
   uSystem,
   uElastic,
   uAstroBlaster,
-  uChainAction;
+  uChainAction,
+  uScroll,
+  uViewports;
 
 type
   { TTestbed }
@@ -136,6 +138,7 @@ type
     miAudio_Positional,
 
     // graphics
+      // bitmap
       miGraphics_BitmapTiled,
       miGraphics_BitmapFlipped,
       miGraphics_BitmapAllocate,
@@ -144,6 +147,9 @@ type
       miGraphics_BitmapPNGTrans,
       miGraphics_BitmapColorKeyTrans,
       miGraphics_BitmapAlignment,
+
+      // font
+      miGraphics_FontUnicode,
 
     // input
 
@@ -154,13 +160,16 @@ type
     // demos
     miDemo_Elastic,
     miDemo_AstroBlaster,
-    miDemo_ChainAction
+    miDemo_ChainAction,
+    miDemo_Scroll,
+    miDemo_MultiViewports
     );
 var
   LTreeMenu: TTreeMenu;
   LAudio: Integer;
   LGraphics: Integer;
   LGraphics_Bitmap: Integer;
+  LGraphics_Font: Integer;
   LInput: Integer;
   LSystem: Integer;
   LUI: Integer;
@@ -190,6 +199,12 @@ begin
         LTreeMenu.AddItem(LGraphics_Bitmap, 'Transparancy: ColorKey', Ord(miGraphics_BitmapColorKeyTrans), True);
         LTreeMenu.AddItem(LGraphics_Bitmap, 'Alignment', Ord(miGraphics_BitmapAlignment), True);
       LTreeMenu.Sort(LGraphics_Bitmap);
+
+      // font
+      LGraphics_Font := LTreeMenu.AddItem(LGraphics, 'Font', TREEMENU_NONE, True);
+        LTreeMenu.AddItem(LGraphics_Font, 'Unicode', Ord(miGraphics_FontUnicode), True);
+      LTreeMenu.Sort(LGraphics_Font);
+
     LTreeMenu.Sort(LGraphics);
 
     // input
@@ -216,6 +231,8 @@ begin
       LTreeMenu.AddItem(LDemos, 'Elastic', Ord(miDemo_Elastic), True);
       LTreeMenu.AddItem(LDemos, 'AstroBlaster', Ord(miDemo_AstroBlaster), True);
       LTreeMenu.AddItem(LDemos, 'ChainAction', Ord(miDemo_ChainAction), True);
+      LTreeMenu.AddItem(LDemos, 'Scroll', Ord(miDemo_Scroll), True);
+      LTreeMenu.AddItem(LDemos, 'MultiViewports', Ord(miDemo_MultiViewports), True);
     LTreeMenu.Sort(LDemos);
 
     LSelItem := ConfigFile.GetValue('TreeMenu', 'SelItem', TREEMENU_NONE);
@@ -236,10 +253,15 @@ begin
         miGraphics_BitmapColorKeyTrans : Engine.RunGame(TBitmapColorKeyTrans);
         miGraphics_BitmapAlignment     : Engine.RunGame(TBitmapAlignment);
 
+        // font
+        miGraphics_FontUnicode         : Engine.RunGame(TFontUnicode);
+
         // demos
         miDemo_Elastic                 : Engine.RunGame(TElastic);
-        miDemo_AstroBlaster            : Engine.RunGame(TAstroBlasterDemo);
+        miDemo_AstroBlaster            : Engine.RunGame(TAstroBlaster);
         miDemo_ChainAction             : Engine.RunGame(TChainAction);
+        miDemo_Scroll                  : Engine.RunGame(TScroll);
+        miDemo_MultiViewports          : Engine.RunGame(TMultiViewports);
       end;
     until LSelItem = TREEMENU_QUIT;
     ConfigFile.SetValue('TreeMenu', 'SelItem', LTreeMenu.GetLastSelectedId);

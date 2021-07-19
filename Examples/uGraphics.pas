@@ -81,6 +81,22 @@ type
     procedure OnUpdate(aDeltaTime: Double); override;
   end;
 
+  { TFontUnicodee }
+  TFontUnicode = class(TCustomExample)
+  protected
+    FUnicodeFont: TFont;
+  public
+    procedure OnSetConfig(var aConfig: TGameConfig); override;
+    procedure OnLoad; override;
+    procedure OnExit; override;
+    procedure OnStartup; override;
+    procedure OnShutdown; override;
+    procedure OnRender; override;
+    procedure OnRenderHUD; override;
+    procedure OnUpdate(aDeltaTime: Double); override;
+  end;
+
+
   { TBitmapTiled }
   TBitmapTiled = class(TCustomExample)
   protected
@@ -715,6 +731,63 @@ begin
 end;
 
 procedure TBitmapTiled.OnRenderHUD;
+begin
+  inherited;
+
+end;
+
+{ TFontUnicode }
+
+procedure TFontUnicode.OnExit;
+begin
+  inherited;
+
+end;
+
+procedure TFontUnicode.OnLoad;
+begin
+  inherited;
+
+end;
+
+procedure TFontUnicode.OnRender;
+begin
+  inherited;
+
+end;
+
+procedure TFontUnicode.OnRenderHUD;
+begin
+  inherited;
+
+  FUnicodeFont.Print(Config.DisplayWidth div 2, Config.DisplayHeight div 2, YELLOW, haCenter, ' en   zh      ja       ko        de   es   pt     fr      vi    id', []);
+  FUnicodeFont.Print(Config.DisplayWidth div 2, (Config.DisplayHeight div 2)+18, GREEN, haCenter, 'Hello|你好|こんにちは|안녕하세요|Hallo|Hola|Olá|Bonjour|Xin chào|Halo', []);
+
+end;
+
+procedure TFontUnicode.OnSetConfig(var aConfig: TGameConfig);
+begin
+  inherited;
+
+  aConfig.DisplayTitle := cExampleTitle + 'Font Unicode';
+
+end;
+
+procedure TFontUnicode.OnShutdown;
+begin
+  FreeAndNil(FUnicodeFont);
+
+  inherited;
+end;
+
+procedure TFontUnicode.OnStartup;
+begin
+  inherited;
+
+  FUnicodeFont := TFont.LoadFont(16, 'arc/fonts/default-mono.ttf');
+end;
+
+procedure TFontUnicode.OnUpdate(aDeltaTime: Double);
 begin
   inherited;
 

@@ -288,7 +288,7 @@ type
   TCustomGameApp = class(TCustomGame)
   protected
     FConfigFile: TConfigFile;
-    FFont: TScaledFont;
+    FFont: TFont;
     FScene: TActorScene;
     FSprite: TSprite;
   public
@@ -297,7 +297,7 @@ type
     MousePos: TVector;
 
     property ConfigFile: TConfigFile read FConfigFile;
-    property Font: TScaledFont read FFont;
+    property Font: TFont read FFont;
     property Scene: TActorScene read FScene;
     property Sprite: TSprite read FSprite;
 
@@ -1432,7 +1432,7 @@ begin
   Display.Open(Config.DisplayWidth, Config.DisplayHeight, Config.DisplayFullscreen, Config.DisplayTitle, Config.ProgrammablePipeLine);
 
   // init font
-  FFont := TScaledFont.Create;
+  FFont := TFont.Create;
   FFont.Load(Config.FontSize);
 
   // init sprite
