@@ -1410,13 +1410,15 @@ begin
   FConfigfile.Open(Config.ConfigFilename);
 
   // mount achive if exists
-  Engine.OpenArchive(Config.ArchiveFilename);
+  if not Config.ArchiveFilename.IsEmpty then
+    Engine.OpenArchive(Config.ArchiveFilename);
 end;
 
 procedure TCustomGameApp.OnExit;
 begin
   // unmount archive if exist
-  Engine.CloseArchive;
+  if not Config.ArchiveFilename.IsEmpty then
+    Engine.CloseArchive;
 
   // close configfile
   FreeAndNil(FConfigFile);
